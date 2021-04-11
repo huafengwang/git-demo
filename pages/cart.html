@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>组件案例-购物车</title>
+		<script src="../js/vue.js"></script>
+		<style lang="scss" type="text/css">
+			#app {}
+			.page{
+				color: #0000FF;
+			}
+
+			#container {
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+
+			}
+
+			#cart {
+				display: flex;
+				flex-flow: column;
+				width: 400px;
+			}
+
+			.title {
+				text-align: center;
+				background-color: #FFA500;
+				height: 50px;
+				line-height: 50px;
+			}
+
+			.total {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				background-color: orange;
+				height: 60px;
+				line-height: 60px;
+				vertical-align: center;
+			}
+
+			.cartImg {
+				width: 30px;
+				height: 30px;
+				margin: 0 20px;
+			}
+
+			.price {
+				width: 150px;
+
+			}
+
+			.balanceBtn {
+				width: 80px;
+				height: 40px;
+				font-size: 12px;
+				margin: 0 20px;
+			}
+			.content {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				width: 400px;
+				height: 90px;
+				margin: 5px 10px;
+			}
+			.compute{
+				display: flex;
+				flex-direction: row;
+				justify-items: center;
+			}
+			.goodsImage{
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				width: 80px;
+				height: 90px;
+				margin: 10px;
+			}
+			.goodsImage img{
+				width: 70px;height: 70px;
+				align-self: center;
+			}
+			.goodsInfo{
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				height: 60px;
+			}
+			.goods-name{
+				width: 160px;
+				line-height: 20px;
+				font-size: 14px;
+			}
+			.goods-price{
+				color: red;
+				font-size: 14px;
+			}
+			._sub{
+				width: 20px;
+				height: 20px;
+				margin: 8px 2px;
+				background-color: #999999;
+				color: #000000;
+			}
+			.goods-number{
+				width: 30px;
+				height: 20px;
+				margin: 5px;
+				text-align: center;
+			}
+			.operater{
+				font-size: 16px;
+				width: 34px;
+				height: 34px;	
+				margin-right: 20px;
+			}
+			
+			
+			
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<div id="container">
+				<my-cart @:subtract="subtractNum($event)"></my-cart>
+			</div>
+
+		</div>
+	
+		<script>
+			var cartTitle = {
+				props:['uname'],
+				template: `
+					<div class="title">{{uname}}的商品</div>
+				`
+			}
+			var cartContent = {
+				props:["goodsList"],
+				data:function(){
+					return{
+						aa:"../static/subtract.png"
+					}
+				},
+				template: `
+				<div>
+				<div class="content" v-for="electric in goodsList" :key="electric.id">
+				<div class="goodsImage">
+					<img :src="electric.src"> 
+				</div>
+				<div class="goodsInfo">
+				<div class="goods-name">{{electric.name}}</div>
+				<div class="goods-price">{{electric.price}}</div>
+				</div>
+				<div class="compute">
+					<img src="../static/subtract.png" class="_sub" 
+					@click='$emit("subtract",electric.id)'>
+					<input type="text" name="num" 
+					class="goods-number" 
+					:value="electric.num" 
+					@blur="changeMe(electric.id,$event)"/>
+					<img src="../static/plus.png" class="_sub" 
+					@click='$emit("plus",electric.id)'>
+				</div>
+					<img src="../static/cancel.png" class="operater"
+					@click="$emit('cancel',electric.id)">
+				</div>
+				</div>
+				`,
+				methods:{
+					changeMe:function(id,event){
+						console.log(event.target.value)
+						this.$emit("changeInput",{
+							id:id,
+							value: event.target.value
+						})
+					}
+				}
+			}
+			var cartTotal = {
+				props:['goodsList'],
+				template: `
+				<div class="total">
+					<img src="../static/cart0.png" class="cartImg" v-if="totoal===0">
+					<img src="../static/cart.png" class="cartImg" v-else>					
+					<span class="price">总价：{{totoal}}</span>
+					<button type="button" class="balanceBtn">结算</button>
+				
+				</div>
+				`,
+				computed:{
+					totoal:function(){
+						let t = 0;
+						this.goodsList.forEach(item =>{
+							t += item.price * item.num
+						})
+						return t
+					}
+				}
+					
+			}
+
+			Vue.component('my-cart', {
+				data:function(){
+					return{
+						uname:"韦小宝",
+						goodsList:[
+							{
+								id:1,
+								name:"伊莱克斯豪华强力5档吸尘器",
+								price:1680,
+								src:"../static/cleaner.png",
+								num:1
+							},
+							{
+								id:2,
+								name:"长虹TV-0921型电视机",
+								price:3280,
+								src:"../static/tv.png",
+								num:2
+							},
+							{
+								id:3,
+								name:"海尔双门智能节能电冰箱",
+								price:2180,
+								src:"../static/icebox.png",
+								num:4
+							},
+							{
+								id:4,
+								name:"小天鹅全自动滚筒洗衣机",
+								price:7800,
+								src:"../static/washing.png",
+								num:1
+							},
+							{
+								id:5,
+								name:"美的智能微波炉",
+								price:1550,
+								src:"../static/micro.png",
+								num:3
+							}
+						]
+					}					
+				},
+				template: `
+				<div id="cart" >
+				<cart-title :uname="uname"></cart-title>
+				<cart-content :goodsList="goodsList" 
+				@changeInput="changeInput($event)"
+				@changeNum="changeNum($event)"
+				@cancel="cancelGoods($event)"
+				@subtract="subtractNum($event)" 
+				@plus="plusNum($event)"></cart-content>
+				<cart-total :goodsList="goodsList"></cart-total>				
+				</div>
+				`,
+				components: {
+					"cart-title": cartTitle,
+					"cart-content": cartContent,
+					"cart-total": cartTotal
+				},
+				methods:{
+					subtractNum:function(id){
+						console.log(id)
+						let index = this.goodsList.findIndex(item =>{
+							return item.id == id;
+						})
+						console.log("数组索引：",index)
+						if(this.goodsList[index].num > 1){
+							this.goodsList[index].num -= 1;
+						}
+						
+					},
+					plusNum(id){
+						console.log(id)
+						let index = this.goodsList.findIndex(item =>{
+							return item.id == id;
+						})
+						if(this.goodsList[index].num < 10){
+							this.goodsList[index].num += 1;
+						}
+					},
+					cancelGoods(id){
+						let index = this.goodsList.findIndex(item =>{
+							return item.id == id;
+						})
+						console.log(id)
+						console.log("数组索引：",index)
+						this.goodsList.splice(index,1)
+					},
+					changeNum(id){
+						let index = this.goodsList.findIndex(item =>{
+							return item.id == id;
+						})
+						this.goodsList[index].num = this
+					},
+					changeInput(e){
+						// console.log("父组件事件：",typeof e.value)
+						// let index = this.goodsList.findIndex(item =>{
+						// 	return item.id == e.id;
+						// })
+						// this.goodsList[index].num = e.value;
+						
+						this.goodsList.some(item=>{
+							console.log("转换",parseInt(e.value) )
+							if(item.id==e.id){
+								item.num = parseInt(e.value)
+								return true;
+							}
+						})
+					}
+						
+				}
+			})
+
+			var vm = new Vue({
+				el: "#app",
+				data: {
+					
+				},
+				methods: {
+					
+
+				}
+
+			})
+		</script>
+
+
+
+
+	</body>
+</html>
