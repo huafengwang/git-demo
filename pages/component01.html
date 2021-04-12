@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>VUE组件测试</title>
+	</head>
+	<style>
+		.page{}
+		.show-fruit {
+			font-size: 60px;
+		}
+
+		.current {
+			color: orange;
+		}
+
+		.subCom {
+			text-align: center;
+			font-size: 60px;
+		}
+
+		.input {
+			width: 50%;
+			height: 100px;
+			font-size: 40px;
+		}
+
+		.subBtn {
+			margin: 30px;
+			width: 20%;
+			height: 100px;
+			font-size: 40px;
+		}
+
+		.a {
+			color: red;
+		}
+
+		.b {
+			color: blue;
+		}
+
+		.sub {
+			margin: 30px;
+		}
+		.pane{
+			margin: 30px 0;
+		}
+	</style>
+	<body>
+		<div id="app">
+
+			<fruit-list :list="list" @chose-me="handle($event)" class="show-fruit">
+				<template slot-scope="slotProps">
+					<strong class="current" v-if="slotProps.info.id == seletedID">{{slotProps.info.name}}</strong>
+					<span v-else>{{slotProps.info.name}}</span>
+				</template>
+			</fruit-list>
+			<hr class="pane"/>
+			<button type="button" @click="fibHub" class="subBtn" style="{text-align: center;}">不准送礼</button>
+			<hr class="pane"/>
+			<com-a class="sub">
+				<div id="">
+					<strong>组件的列表a:</strong>
+				</div>
+				
+			</com-a>
+			<hr class="pane"/>
+			<com-b class="sub">
+				<div id="">
+					<strong>组件的列表B:</strong>
+				</div>
+			</com-b>
+			<hr class="pane"/>
+			
+
+		</div>
+
+		<script type="text/javascript" src="../js/vue.js"></script>
+		<script type="text/javascript">
+			/* 
+				子组件A
+			 */
+			Vue.component("comA", {
+				template: `
+			<div class="subCom a">			
+				<slot></slot>
+				<div v-for="(caiyao,aIndex) in aList" :key="aIndex">{{caiyao}}</div>
+				<input class="input" v-model="aInput" />
+				<button @click="aAddList(aInput)" class="subBtn">送你一单</button>
+			</div>
+				`,
+				data: function(){
+					return{
+						aList: ["排骨", "小鸡"],
+						aInput: ""
+					}
+				},
+				methods: {
+					aAddList: function(e) {
+						//触发兄弟组件的事件，并传递参数值
+						hub.$emit('b-event',e);
+						this.aInput = "";
+					}
+
+				},
+				mounted:function(){
+					hub.$on('a-event',(ral) =>{
+						this.aList.push(ral);
+					})
+				}
+			});
+
+			/* 
+			   子组件B
+			 */
+			Vue.component("comB", {
+				template: `
+				<div class="subCom b">
+					<slot></slot>
+					<div v-for="(fruit,bIndex) in bList" :key="bIndex">{{fruit}}</div>
+					<input class="input" v-model="bInput" />
+					<button @click="bAddList(bInput)" class="subBtn">回敬一票</button>
+				</div>
+				`,
+				data: function(){
+					return{
+						bList: ["山竹", "榴莲"],
+						bInput: ""
+					}
+				},
+				methods: {
+					bAddList: function(e) {
+						//触发兄弟组件的事件，并传递参数
+						hub.$emit('a-event',e)
+						this.bInput = "";
+					}
+
+				},
+				mounted:function(){
+					hub.$on('b-event',(ral) =>{
+						this.bList.push(ral);						
+					})
+				}
+			})
+
+
+			/* 
+				作用域插槽
+			 */
+			Vue.component('fruit-list', {
+				props: ['list'],
+				template: `
+					<div>
+					<li v-for="item in list" :key="item.id" @click='$emit("chose-me",item.id)'>
+					<slot :info="item">{{item.name}}</slot>
+					</li>
+					</div>
+				`,
+				methods: {
+
+				}
+			});
+
+			/* 
+			 公共插槽
+			 */
+			var hub = new Vue();
+
+			var vm = new Vue({
+				el: "#app",
+				data: {
+					seletedID: 0,
+					list: [{
+							id: 1,
+							name: "apple"
+						},
+						{
+							id: 2,
+							name: "orange"
+						},
+						{
+							id: 3,
+							name: "banana"
+						}
+					]
+				},
+				methods: {
+					// handle: function(e){
+					// 	console.log("获取的值：",e)
+					// 	this.seletedID = e;
+					// },
+					handle(e) {
+						console.log("获取的值：", e)
+						this.seletedID = e;
+					},
+					fibHub(){
+						hub.$off('a-event');
+						hub.$off('b-event');
+					}
+				}
+			})
+		</script>
+	</body>
+</html>
